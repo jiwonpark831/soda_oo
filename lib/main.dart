@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options.dart';
@@ -14,7 +14,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await initializeDateFormatting('ko_KR');
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: startPage());
+    return const MaterialApp(home: startPage());
   }
 }
 
@@ -43,8 +43,8 @@ class startPage extends StatelessWidget {
                 style: b27.copyWith(fontSize: 30),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 34),
+            const Padding(
+              padding: EdgeInsets.only(top: 34),
               child: Text(
                 '소개',
                 style: b20,
@@ -58,8 +58,8 @@ class startPage extends StatelessWidget {
               child: TextButton(
                 child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 55, 0),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 55, 0),
                       child: Icon(
                         Icons.mail,
                         color: AppColor.textbox,
@@ -72,7 +72,7 @@ class startPage extends StatelessWidget {
                 ),
                 style: TextButton.styleFrom(
                     backgroundColor: AppColor.primary,
-                    minimumSize: Size(320, 56),
+                    minimumSize: const Size(320, 56),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     )),
@@ -97,6 +97,6 @@ class secondPage extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: LoginSignupScreen());
+    return const Scaffold(body: LoginSignupScreen());
   }
 }
