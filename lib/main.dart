@@ -8,6 +8,7 @@ import 'theme/color.dart';
 import 'theme/text.dart';
 
 //도욱
+//지원
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
