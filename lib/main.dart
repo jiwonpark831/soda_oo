@@ -7,8 +7,8 @@ import 'login/login.dart';
 import 'theme/color.dart';
 import 'theme/text.dart';
 
-//도욱
-//지원
+//도욱  지원
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
