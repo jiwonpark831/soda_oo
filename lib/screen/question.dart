@@ -1,21 +1,23 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../login/randomcode.dart';
 import '../theme/color.dart';
 import '../theme/text.dart';
 import 'history.dart';
+import 'history2.dart';
 
-
+String roomCode = RandomRoomScreen.roomCode;
 int currentQuestionIndex = 0;
 String currentQuestion = '';
 
 class questionPage extends StatefulWidget {
-  String roomCode = RandomRoomScreen.roomCode;
-
-  questionPage({Key? key, required this.roomCode});
+  questionPage({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<questionPage> createState() => _questionPageState();
@@ -83,30 +85,27 @@ class _questionPageState extends State<questionPage> {
     currentQuestion = questionList[currentQuestionIndex];
   }
 
-  void submitAnswer(BuildContext context) {
+  void submitAnswer(BuildContext context) async {
     String answer = answerController.text.trim();
-    if (answer.isNotEmpty) {
-      FirebaseFirestore.instance
-          .collection('rooms')
-          .doc('851664')
-          .get()
-          .then((roomSnapshot) {
-        List<dynamic> userList = roomSnapshot.data()!['users'];
-        String userNickname = userList[0];
 
+    if (answer.isNotEmpty) {
+      String? userEmail = FirebaseAuth.instance.currentUser?.email;
+      String? userNickname = await getNickname(userEmail);
+      if (userEmail != null && userNickname != null) {
         FirebaseFirestore.instance
             .collection('rooms')
-            .doc('851664')
+            .doc(roomCode)
             .collection('$currentQuestion')
             .add({
           'question': currentQuestion,
-          'nickname': userNickname,
+          'useremail': userEmail,
           'answer': answer,
           'timestamp': DateTime.now(),
+          'avatar': userNickname,
         }).then((_) async {
           await FirebaseFirestore.instance
               .collection('rooms')
-              .doc('851664')
+              .doc(roomCode)
               .set({
             'subcollections': FieldValue.arrayUnion(['$currentQuestion'])
           }, SetOptions(merge: true));
@@ -125,9 +124,7 @@ class _questionPageState extends State<questionPage> {
         }).catchError((error) {
           print('Failed to submit answer: $error');
         });
-      }).catchError((error) {
-        print('Failed to get user nickname: $error');
-      });
+      }
     }
   }
 
@@ -149,84 +146,95 @@ class _questionPageState extends State<questionPage> {
         backgroundColor: AppColor.background,
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 35),
-            child: Container(
-              width: 320,
-              height: 100,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColor.secondary)),
-              child: Center(
-                child: Text(
-                  '$currentQuestion',
-                  style: b18,
+      body: Center(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 50),
+              child: Image.asset(
+                '/Users/parkjiwon/Desktop/soda/oo/assets/logo.png',
+                width: 80,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 40),
+              child: Container(
+                width: 325,
+                height: 100,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColor.secondary)),
+                child: Center(
+                  child: Text(
+                    '$currentQuestion',
+                    style: b18,
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(25),
-            child: SizedBox(
-              height: 300,
-              child: TextField(
-                maxLines: 20,
-                controller: answerController,
-                decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide:
-                        BorderSide(color: AppColor.texth), // 포커스된 상태의 테두리 색
+            Padding(
+              padding: const EdgeInsets.all(25),
+              child: SizedBox(
+                height: 215,
+                width: 325,
+                child: TextField(
+                  maxLines: 6,
+                  maxLength: 30,
+                  controller: answerController,
+                  decoration: InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: AppColor.texth), // 포커스된 상태의 테두리 색
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: AppColor.texth), // 비활성화된 상태의 테두리 색
+                    ),
+                    fillColor: AppColor.textbox,
+                    filled: true,
+                    hintText: '답변을 입력하세요',
+                    hintStyle: l22.copyWith(color: AppColor.textboxs),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide:
-                        BorderSide(color: AppColor.texth), // 비활성화된 상태의 테두리 색
-                  ),
-                  fillColor: AppColor.textbox,
-                  filled: true,
-                  hintText: '답변을 입력하세요',
-                  hintStyle: l17.copyWith(color: AppColor.textboxs),
                 ),
               ),
             ),
-          ),
-          Text(
-            '답변 등록시, 수정이 불가하니 신중하게!',
-            style: b13,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 15),
-            child: Container(
+            Text(
+              '답변 등록시, 수정이 불가하니 신중하게!',
+              style: b13.copyWith(color: Color(0xff9D9D9D)),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 15),
+              child: Container(
+                width: 320,
+                height: 50,
+                child: TextButton(
+                    style: TextButton.styleFrom(
+                        backgroundColor: AppColor.primary,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    onPressed: () => submitAnswer(context),
+                    child: Text('답변 등록하기', style: b20)),
+              ),
+            ),
+            Container(
               width: 320,
               height: 50,
               child: TextButton(
-                  style: TextButton.styleFrom(
-                      backgroundColor: AppColor.primary,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                  onPressed: () => submitAnswer(context),
-                  child: Text('답변 등록하기', style: b20)),
-            ),
-          ),
-          Container(
-            width: 320,
-            height: 50,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                  backgroundColor: AppColor.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10))),
-              onPressed: goToNextQuestion,
-              child: Text(
-                '다음 질문으로',
-                style: b20.copyWith(color: AppColor.texth),
+                style: TextButton.styleFrom(
+                    backgroundColor: AppColor.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                onPressed: goToNextQuestion,
+                child: Text(
+                  '다음 질문으로',
+                  style: b20.copyWith(color: AppColor.texth),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -245,13 +253,14 @@ class AnswerPage extends StatefulWidget {
 class _AnswerPageState extends State<AnswerPage> {
   late Stream<QuerySnapshot> answersStream;
   late Stream<DocumentSnapshot> userStream;
+  late Stream<DocumentSnapshot> roomStream;
 
   @override
   void initState() {
     super.initState();
     answersStream = FirebaseFirestore.instance
         .collection('rooms')
-        .doc('851664')
+        .doc(roomCode)
         .collection('$currentQuestion')
         .orderBy('timestamp', descending: true)
         .snapshots();
@@ -260,9 +269,16 @@ class _AnswerPageState extends State<AnswerPage> {
   Stream<DocumentSnapshot> getUserStream(String userId) {
     return FirebaseFirestore.instance
         .collection('rooms')
-        .doc('851664')
+        .doc(roomCode)
         .collection('$currentQuestion')
         .doc(userId)
+        .snapshots();
+  }
+
+  Stream<DocumentSnapshot> getRoomStream() {
+    return FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomCode)
         .snapshots();
   }
 
@@ -287,7 +303,7 @@ class _AnswerPageState extends State<AnswerPage> {
           //   crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(right: 35),
+              padding: const EdgeInsets.only(right: 23),
               child: Align(
                 alignment: Alignment.topRight,
                 child: ElevatedButton(
@@ -299,7 +315,7 @@ class _AnswerPageState extends State<AnswerPage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => historyPage(),
+                            builder: (context) => historyPage2(),
                           ));
                     },
                     child: Text(
@@ -312,7 +328,7 @@ class _AnswerPageState extends State<AnswerPage> {
               padding: const EdgeInsets.only(top: 30, bottom: 36),
               child: Container(
                 height: 90,
-                width: 320,
+                width: 350,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppColor.secondary)),
@@ -345,9 +361,9 @@ class _AnswerPageState extends State<AnswerPage> {
                   }
 
                   return ListView(
-                    shrinkWrap: true,
                     children: snapshot.data!.docs.map((document) {
                       userStream = getUserStream(document.id);
+                      roomStream = getRoomStream();
                       return StreamBuilder<DocumentSnapshot>(
                         stream: userStream,
                         builder: (context, userSnapshot) {
@@ -358,40 +374,41 @@ class _AnswerPageState extends State<AnswerPage> {
 
                           var data = userSnapshot.data!.data()
                               as Map<String, dynamic>?;
-                          if (data == null || !data.containsKey('nickname')) {
-                            return Text('Error: No nickname found');
+                          if (data == null || !data.containsKey('avatar')) {
+                            return Text('Error: No qna found');
                           }
 
-                          var nickname = data['nickname'];
                           var answer = document.get('answer');
+                          var userNickname = document.get('avatar');
                           return ListTile(
-                            leading: Image.asset(
-                              '/Users/parkjiwon/Desktop/soda/yiyung/assets/logo.png',
-                              width: 45,
-                            ),
-                            title: Padding(
-                              padding: const EdgeInsets.only(top: 15),
-                              child: Text(
-                                '$nickname',
-                                style: l15,
+                            leading: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Image.asset(
+                                '/Users/parkjiwon/Desktop/soda/oo/assets/minipodogreen.png',
+                                width: 48,
                               ),
                             ),
+                            title: Text(
+                              userNickname,
+                              style: l15,
+                            ),
                             subtitle: Container(
-                                height: 50,
-                                width: 252,
-                                decoration: BoxDecoration(
-                                    color: AppColor.textbox,
-                                    border:
-                                        Border.all(color: AppColor.textboxs),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 12, top: 10),
-                                  child: Text(
-                                    '$answer',
-                                    style: b18,
-                                  ),
-                                )),
+                              width: 252,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: AppColor.textbox,
+                                border: Border.all(color: AppColor.textboxs),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 12, top: 10),
+                                child: Text(
+                                  '$answer',
+                                  style: b18,
+                                ),
+                              ),
+                            ),
                           );
                         },
                       );
@@ -405,4 +422,22 @@ class _AnswerPageState extends State<AnswerPage> {
       ),
     );
   }
+}
+
+Future<String> getNickname(String? userEmail) async {
+  String nickname = '';
+  if (userEmail == null) return '';
+  DocumentSnapshot roomSnapshot =
+      await FirebaseFirestore.instance.collection('rooms').doc(roomCode).get();
+  Map<String, dynamic>? roomData = roomSnapshot.data() as Map<String, dynamic>?;
+  List<dynamic>? qnaField = roomData?['qna'] as List<dynamic>?;
+  if (qnaField != null) {
+    for (var item in qnaField) {
+      Map<String, dynamic> userMap = item as Map<String, dynamic>;
+
+      nickname = userMap['nickname'];
+    }
+  }
+
+  return nickname ?? '';
 }

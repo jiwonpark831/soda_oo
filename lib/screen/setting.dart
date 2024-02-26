@@ -1,23 +1,57 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:oo/main.dart';
+import 'package:oo/main2.dart';
+import '../login/randomcode.dart';
 import '../theme/color.dart';
 import '../theme/text.dart';
 
+String roomCode = RandomRoomScreen.roomCode;
 
 class settingPage extends StatefulWidget {
   const settingPage({super.key});
+  static String fm = '';
 
   @override
   State<settingPage> createState() => _settingPageState();
 }
 
 class _settingPageState extends State<settingPage> {
-  final _formKey = GlobalKey<FormState>();
-  String userName = '';
+  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _nicknameController2 = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.email)
+            .get()
+            .then((doc) {
+          if (doc.exists) {
+            setState(() {
+              _nicknameController.text = doc['nickname'] ?? '';
+            });
+          } else {
+            FirebaseFirestore.instance.collection('users').doc(user.email).set({
+              'profileImage': '',
+              'nickname': '',
+            });
+          }
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColor.background,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Padding(
           padding: const EdgeInsets.only(left: 20),
@@ -34,385 +68,393 @@ class _settingPageState extends State<settingPage> {
         child: Container(
           color: AppColor.background,
           alignment: Alignment.centerRight,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-                padding: const EdgeInsets.only(top: 15, left: 38),
-                child: Text(
-                  '우리 가족방 코드',
-                  style: l22,
-                )),
-            Center(
-              child: Column(children: [
-                Padding(
-                    padding: const EdgeInsets.only(top: 27),
-                    child: Container(
-                      width: 240,
-                      height: 45,
-                      child: TextButton(
-                        child: Text(
-                          'coooode',
-                          style: TextStyle(
-                              color: AppColor.text,
-                              fontSize: 25,
-                              fontFamily: 'Kangwonedu'),
-                        ),
-                        style: TextButton.styleFrom(
-                            backgroundColor: Color(0xffB0CFA3),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            )),
-                        onPressed: () {},
-                      ),
-                    )),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(top: 15, left: 38),
                   child: Text(
-                    '코드를 복사해 가족에게 공유하세요!',
-                    style: l13,
-                  ),
-                ),
-              ]),
-            ),
-            Divider(
-              color: Color(0xffD9D9D9),
-              indent: 15,
-              endIndent: 15,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 38, top: 10, bottom: 10),
-              child: TextButton(
-                  child: Row(
-                    children: [
-                      Text(
-                        '내 프로필 수정',
-                        style: l22,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 160),
-                        child: Icon(
-                          Icons.chevron_right,
-                          size: 25,
-                          color: AppColor.text,
-                        ),
-                      ),
-                    ],
-                  ),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SingleChildScrollView(
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  topRight: Radius.circular(30),
-                                ),
-                                color: AppColor.textbox),
-                            height: 800,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 35, left: 30),
-                                  child: Text(
-                                    '개인 프로필 수정',
-                                    style: b20,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 20),
-                                  child: Center(
-                                    child: Column(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: Image.asset(
-                                            '/Users/parkjiwon/Desktop/soda/yiyung/assets/editindipro.png',
-                                            width: 160,
-                                          ),
-                                        ),
-                                        Text(
-                                          '프로필 사진',
-                                          style: l13.copyWith(
-                                              color: Color(0xffA1A1A1)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: Column(children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 24),
-                                      child: Container(
-                                        height: 50,
-                                        width: 250,
-                                        child: TextFormField(
-                                          key: const ValueKey(1),
-                                          validator: (value) {
-                                            if (value!.isEmpty ||
-                                                value.length < 4) {
-                                              return 'Please enter at least 4 characters.';
-                                            }
-                                            return null;
-                                          },
-                                          onSaved: (value) {
-                                            userName = value!;
-                                          },
-                                          onChanged: (value) {
-                                            userName = value;
-                                          },
-                                          maxLength: 10,
-                                          decoration: const InputDecoration(
-                                            fillColor: AppColor.textbox,
-                                            filled: true,
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: AppColor.texth,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(5)),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: AppColor.texth,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(5)),
-                                            ),
-                                            hintText: '사용할 닉네임을 입력하세요.',
-                                            hintStyle: l15g,
-                                            contentPadding: EdgeInsets.all(5),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 41),
-                                      child: TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: AppColor.primary,
-                                          minimumSize: const Size(250, 38),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                        ),
-                                        onPressed: () {},
-                                        child: Text(
-                                          '수정하기',
-                                          style: b20,
-                                        ),
-                                      ),
-                                    )
-                                  ]),
-                                )
-                              ],
-                            ),
+                    '우리 가족방 코드',
+                    style: l22,
+                  )),
+              Center(
+                child: Column(children: [
+                  Padding(
+                      padding: const EdgeInsets.only(top: 27),
+                      child: Container(
+                        width: 240,
+                        height: 45,
+                        child: TextButton(
+                          child: Text(
+                            roomCode,
+                            style: b23,
                           ),
-                        );
-                      },
-                    );
-                  }),
-            ),
-            Divider(
-              color: Color(0xffD9D9D9),
-              indent: 15,
-              endIndent: 15,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 38, top: 10, bottom: 10),
-              child: TextButton(
-                child: Row(
-                  children: [
-                    Text(
-                      '가족 프로필 수정',
-                      style: l22,
+                          style: TextButton.styleFrom(
+                              backgroundColor: Color(0xffF9E7C5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              )),
+                          onPressed: () {},
+                        ),
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 30),
+                    child: Text(
+                      '코드를 복사해 가족에게 공유하세요!',
+                      style: l15,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 143),
-                      child: Icon(
-                        Icons.chevron_right,
-                        size: 25,
-                        color: AppColor.text,
-                      ),
+                  ),
+                ]),
+              ),
+              Divider(
+                color: Color(0xffD9D9D9),
+                indent: 25,
+                endIndent: 25,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 38, top: 10, bottom: 10),
+                child: TextButton(
+                    child: Row(
+                      children: [
+                        Text(
+                          '닉네임 설정',
+                          style: l22,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 190),
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 25,
+                            color: AppColor.text,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SingleChildScrollView(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(30),
-                                topRight: Radius.circular(30),
-                              ),
-                              color: AppColor.textbox),
-                          height: 800,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 35, left: 30),
-                                child: Text(
-                                  '가족 프로필 수정',
-                                  style: b20,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 20),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      IconButton(
-                                        onPressed: () {},
-                                        icon: Image.asset(
-                                          '/Users/parkjiwon/Desktop/soda/yiyung/assets/editfampro.png',
-                                          width: 330,
-                                        ),
-                                      ),
-                                      Text(
-                                        '배너에 등록할 사진을 첨부하세요',
-                                        style: l13.copyWith(
-                                            color: Color(0xffA1A1A1)),
-                                      ),
-                                    ],
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SingleChildScrollView(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30),
                                   ),
-                                ),
-                              ),
-                              Center(
-                                child: Column(children: [
+                                  color: AppColor.textbox),
+                              height: 800,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 24),
-                                    child: Container(
-                                      height: 50,
-                                      width: 250,
-                                      child: TextFormField(
-                                        key: const ValueKey(1),
-                                        validator: (value) {
-                                          if (value!.isEmpty ||
-                                              value.length < 4) {
-                                            return 'Please enter at least 4 characters.';
-                                          }
-                                          return null;
-                                        },
-                                        onSaved: (value) {
-                                          userName = value!;
-                                        },
-                                        onChanged: (value) {
-                                          userName = value;
-                                        },
-                                        maxLength: 10,
-                                        decoration: const InputDecoration(
-                                          fillColor: AppColor.textbox,
-                                          filled: true,
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: AppColor.texth,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5)),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: AppColor.texth,
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5)),
-                                          ),
-                                          hintText: '등록할 가족방 이름을 입력하세요.',
-                                          hintStyle: l15g,
-                                          contentPadding: EdgeInsets.all(5),
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.only(
+                                        top: 35, left: 30),
+                                    child: Text(
+                                      '닉네임 설정',
+                                      style: l22,
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 40),
-                                    child: TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: AppColor.primary,
-                                        minimumSize: const Size(250, 38),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
+                                    padding: const EdgeInsets.only(top: 20),
+                                    child: Center(
+                                      child: Column(children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 30),
+                                          child: Image.asset(
+                                            '/Users/parkjiwon/Desktop/soda/oo/assets/logo.png',
+                                            width: 100,
+                                          ),
                                         ),
-                                      ),
-                                      onPressed: () {},
-                                      child: Text(
-                                        '수정하기',
-                                        style: b20,
-                                      ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 72),
+                                          child: Container(
+                                            height: 60,
+                                            width: 250,
+                                            child: TextField(
+                                              controller: _nicknameController,
+                                              decoration: InputDecoration(
+                                                hintText: '설정할 닉네임을 입력하세요',
+                                                hintStyle: l15g,
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  borderSide: BorderSide(
+                                                      color: AppColor.textt),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  borderSide: BorderSide(
+                                                      color: AppColor.textt),
+                                                ),
+                                              ),
+                                              maxLength: 10,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 24),
+                                          child: TextButton(
+                                            onPressed: () async {
+                                              final user = FirebaseAuth
+                                                  .instance.currentUser;
+                                              final email = user?.email;
+
+                                              if (email != null) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(email)
+                                                    .update({
+                                                  'nickname':
+                                                      _nicknameController.text
+                                                });
+
+                                                setState(() {
+                                                  _nicknameController.text =
+                                                      _nicknameController.text;
+                                                });
+
+                                                await FirebaseFirestore.instance
+                                                    .collection('rooms')
+                                                    .doc(roomCode)
+                                                    .update({
+                                                  'nicknames':
+                                                      FieldValue.arrayUnion([
+                                                    _nicknameController.text
+                                                  ]),
+                                                  'qna': FieldValue.arrayUnion([
+                                                    {
+                                                      'userEmail': email,
+                                                      'nickname':
+                                                          _nicknameController
+                                                              .text
+                                                    }
+                                                  ])
+                                                });
+                                              }
+                                              Navigator.of(context).pop();
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: AppColor.primary,
+                                              minimumSize: const Size(250, 38),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '설정하기',
+                                              style: b20,
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
                                     ),
                                   )
-                                ]),
-                              )
-                            ],
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }),
+              ),
+              Divider(
+                color: Color(0xffD9D9D9),
+                indent: 25,
+                endIndent: 25,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 38, top: 10, bottom: 10),
+                child: TextButton(
+                    child: Row(
+                      children: [
+                        Text(
+                          '가족방 이름 설정',
+                          style: l22,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 146),
+                          child: Icon(
+                            Icons.chevron_right,
+                            size: 25,
+                            color: AppColor.text,
                           ),
                         ),
+                      ],
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SingleChildScrollView(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30),
+                                  ),
+                                  color: AppColor.textbox),
+                              height: 800,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 35, left: 30),
+                                    child: Text(
+                                      '가족방 이름 설정',
+                                      style: l22,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 1),
+                                    child: Center(
+                                      child: Column(children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 25),
+                                          child: Image.asset(
+                                            '/Users/parkjiwon/Desktop/soda/oo/assets/familylogo.png',
+                                            width: 274,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 50),
+                                          child: Container(
+                                            height: 60,
+                                            width: 250,
+                                            child: TextField(
+                                              controller: _nicknameController2,
+                                              decoration: InputDecoration(
+                                                hintText: '설정할 가족방 이름을 입력하세요',
+                                                hintStyle: l15g,
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  borderSide: BorderSide(
+                                                      color: AppColor.textt),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  borderSide: BorderSide(
+                                                      color: AppColor.textt),
+                                                ),
+                                              ),
+                                              maxLength: 10,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 24),
+                                          child: TextButton(
+                                            onPressed: () async {
+                                              settingPage.fm =
+                                                  _nicknameController2.text;
+                                              final user = FirebaseAuth
+                                                  .instance.currentUser;
+                                              final email = user?.email;
+
+                                              if (email != null) {
+                                                setState(() {
+                                                  _nicknameController2.text =
+                                                      _nicknameController2.text;
+
+                                                  settingPage.fm =
+                                                      _nicknameController2.text;
+                                                });
+
+                                                await FirebaseFirestore.instance
+                                                    .collection('rooms')
+                                                    .doc(roomCode)
+                                                    .update({
+                                                  'familyname':
+                                                      _nicknameController2.text,
+                                                });
+                                              }
+                                              Navigator.of(context).pop();
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: AppColor.primary,
+                                              minimumSize: const Size(250, 38),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '설정하기',
+                                              style: b20,
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
-                    },
-                  );
-                },
+                    }),
               ),
-            ),
-            Divider(
-              color: Color(0xffD9D9D9),
-              indent: 15,
-              endIndent: 15,
-            ),
-            Center(
+              Divider(
+                color: Color(0xffD9D9D9),
+                indent: 25,
+                endIndent: 25,
+              ),
+              Center(
                 child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 57),
-                  child: Image.asset(
-                    '/Users/parkjiwon/Desktop/soda/yiyung/assets/wink.png',
-                    width: 105,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 72),
-                  child: TextButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: AppColor.textbox,
-                            actions: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(top: 30),
-                                child: Center(
-                                    child: Container(
-                                        height: 80,
-                                        child: Text(
-                                          '로그아웃 하시겠습니까?',
-                                          style: l22,
-                                        ))),
-                              ),
-                              Divider(
-                                color: AppColor.texth,
-                                thickness: 1,
-                              ),
-                              Container(
-                                height: 60,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 57),
+                      child: Image.asset(
+                        '/Users/parkjiwon/Desktop/soda/oo/assets/wink.png',
+                        width: 105,
+                      ),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 65),
+                        child: TextButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: AppColor.textbox,
+                                  title: Padding(
+                                    padding: const EdgeInsets.only(top: 30),
+                                    child: Center(
+                                        child: Container(
+                                            height: 80,
+                                            child: Text(
+                                              '로그아웃 하시겠습니까?',
+                                              style: l22,
+                                            ))),
+                                  ),
+                                  actions: <Widget>[
                                     TextButton(
+                                      onPressed: () async {
+                                        await FirebaseAuth.instance.signOut();
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  startPage()),
+                                        );
+                                      },
                                       child: Text(
                                         '예',
                                         style: l22.copyWith(fontSize: 20),
                                       ),
-                                      onPressed: () {},
                                     ),
                                     TextButton(
                                       child: Text(
@@ -424,24 +466,23 @@ class _settingPageState extends State<settingPage> {
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Text(
-                        '로그아웃',
-                        style: l17.copyWith(
-                            fontSize: 16, decoration: TextDecoration.underline),
-                      )),
+                              );
+                            },
+                            child: Text(
+                              '로그아웃',
+                              style: l17.copyWith(
+                                  fontSize: 16,
+                                  decoration: TextDecoration.underline),
+                            ))),
+                    Text(
+                      '버전 1.0',
+                      style: l13,
+                    ),
+                  ],
                 ),
-                Text(
-                  '버전 1.0',
-                  style: l13,
-                ),
-              ],
-            )),
-          ]),
+              ),
+            ],
+          ),
         ),
       ),
     );

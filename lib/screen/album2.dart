@@ -3,24 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:oo/screen/mainscreen.dart';
-import 'package:oo/screen/setting.dart';
+import 'package:oo/theme/color.dart';
 import '../login/randomcode.dart';
-import '../main2.dart';
-import '../theme/color.dart';
 import '../theme/text.dart';
+import 'package:oo/screen/setting.dart';
 
 String roomCode = RandomRoomScreen.roomCode;
 
-class albumPage extends StatelessWidget {
-  const albumPage({
+class AlbumPage2 extends StatelessWidget {
+  const AlbumPage2({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primaryColor: Colors.green),
       home: const MultipleImageSelector(),
       debugShowCheckedModeBanner: false,
     );
@@ -44,29 +41,17 @@ class _MultipleImageSelectorState extends State<MultipleImageSelector> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.background,
       resizeToAvoidBottomInset: false,
+      backgroundColor: AppColor.background,
       appBar: AppBar(
         backgroundColor: AppColor.background,
         centerTitle: false,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left,
-            color: AppColor.text,
-            size: 30,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: Text(
+            '공유앨범',
+            style: b20,
           ),
-          onPressed: () {
-            Navigator.pop(context);
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MyApp2()),
-            );
-          },
-        ),
-        title: Text(
-          '공유앨범',
-          style: b20,
         ),
         actions: <Widget>[
           Padding(
@@ -181,6 +166,7 @@ class _MultipleImageSelectorState extends State<MultipleImageSelector> {
         return AlertDialog(
           backgroundColor: AppColor.textbox,
           scrollable: true,
+          //  title: Text('댓글 추가'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

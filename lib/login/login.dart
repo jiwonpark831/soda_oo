@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
@@ -15,7 +17,7 @@ class LoginSignupScreen extends StatefulWidget {
 
 class _LoginSignupScreenState extends State<LoginSignupScreen> {
   final _authentication = FirebaseAuth.instance;
-  bool isSignupScreen = true;
+  bool isSignupScreen = false;
   final _formKey = GlobalKey<FormState>();
   String userName = '';
   String userEmail = '';
@@ -153,8 +155,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                       key: const ValueKey(1),
                                                       validator: (value) {
                                                         if (value!.isEmpty ||
-                                                            value.length < 4) {
-                                                          return 'Please enter at least 4 characters.';
+                                                            value.length < 1) {
+                                                          return '1글자 이상의 아이디를 입력하세요';
                                                         }
                                                         return null;
                                                       },
@@ -224,7 +226,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                         if (value!.isEmpty ||
                                                             !value.contains(
                                                                 '@')) {
-                                                          return 'Please enter a valid email address';
+                                                          return '유효한 이메일을 입력하세요';
                                                         }
                                                         return null;
                                                       },
@@ -290,8 +292,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                       key: const ValueKey(3),
                                                       validator: (value) {
                                                         if (value!.isEmpty ||
-                                                            value.length < 5) {
-                                                          return 'Password must be at least 7 characters long.';
+                                                            value.length < 1) {
+                                                          return '비밀번호가 너무 짧아요';
                                                         }
                                                         return null;
                                                       },
@@ -358,8 +360,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                       key: const ValueKey(3),
                                                       validator: (value) {
                                                         if (value!.isEmpty ||
-                                                            value.length < 5) {
-                                                          return 'Password must be at least 7 characters long.';
+                                                            value.length < 1) {
+                                                          return '비밀번호가 너무 짧아요';
                                                         }
                                                         return null;
                                                       },
@@ -457,10 +459,12 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                                   .showSnackBar(
                                                                 const SnackBar(
                                                                   content: Text(
-                                                                      'Please check your email and password'),
+                                                                    '필수정보를 입력하세요',
+                                                                    style: l15,
+                                                                  ),
                                                                   backgroundColor:
-                                                                      Colors
-                                                                          .blue,
+                                                                      AppColor
+                                                                          .textbox,
                                                                 ),
                                                               );
                                                             }
@@ -502,8 +506,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                         validator: (value) {
                                                           if (value!.isEmpty ||
                                                               value.length <
-                                                                  4) {
-                                                            return 'Please enter at least 4 characters.';
+                                                                  1) {
+                                                            return '유효한 이메일을 입력하세요';
                                                           }
                                                           return null;
                                                         },
@@ -574,8 +578,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                                         validator: (value) {
                                                           if (value!.isEmpty ||
                                                               value.length <
-                                                                  4) {
-                                                            return 'Please enter at least 4 characters.';
+                                                                  1) {
+                                                            return '유효한 비밀번호를 입력하세요';
                                                           }
                                                           return null;
                                                         },

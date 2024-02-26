@@ -2,17 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../login/randomcode.dart';
+import '../main2.dart';
 import '../theme/color.dart';
 import '../theme/text.dart';
 
 String roomCode = RandomRoomScreen.roomCode;
 
-class historyPage extends StatefulWidget {
+class historyPage2 extends StatefulWidget {
   @override
-  _historyPageState createState() => _historyPageState();
+  _historyPage2State createState() => _historyPage2State();
 }
 
-class _historyPageState extends State<historyPage> {
+class _historyPage2State extends State<historyPage2> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<String> collectionNames = [];
 
@@ -37,19 +38,29 @@ class _historyPageState extends State<historyPage> {
       backgroundColor: AppColor.background,
       appBar: AppBar(
         backgroundColor: AppColor.background,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: Text('히스토리', style: b20),
+        leading: IconButton(
+          icon: Icon(
+            Icons.chevron_left,
+            color: AppColor.text,
+            size: 30,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyApp2()),
+            );
+          },
         ),
+        title: Text('히스토리', style: b20),
         centerTitle: false,
       ),
       body: ListView.builder(
         itemCount: collectionNames.length,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(
-              top: 7,
-            ),
+            padding: const EdgeInsets.only(top: 7),
             child: Container(
               width: 320,
               height: 60,
@@ -58,12 +69,11 @@ class _historyPageState extends State<historyPage> {
                   borderRadius: BorderRadius.circular(10)),*/
               child: ListTile(
                 title: Padding(
-                  padding: const EdgeInsets.only(left: 15, bottom: 15),
-                  child: Text(
-                    collectionNames[index],
-                    style: l17,
-                  ),
-                ),
+                    padding: const EdgeInsets.only(left: 15, bottom: 15),
+                    child: Text(
+                      collectionNames[index],
+                      style: l17,
+                    )),
                 subtitle: Divider(
                   indent: 10,
                   endIndent: 10,

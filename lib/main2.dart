@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'screen/album.dart';
+import 'screen/album2.dart';
 import 'screen/calendar.dart';
 import 'screen/history.dart';
 import 'screen/mainscreen.dart';
@@ -24,16 +24,16 @@ class _MyApp2State extends State<MyApp2> {
 
   final List<Widget> _pages = [
     historyPage(),
-    //historyPage(questions: [Question(questionText: 'test', answerText: 'test')],),
-    const albumPage(),
-    const mainPage(),
+    AlbumPage2(),
+    mainPage(),
     calendarPage(),
-    const settingPage(),
+    settingPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: _pages.elementAt(_selectedIndex),
         bottomNavigationBar: BottomNavigationBar(
@@ -41,9 +41,9 @@ class _MyApp2State extends State<MyApp2> {
           selectedItemColor: AppColor.text,
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
                 icon: Padding(
-                  padding: EdgeInsets.only(top: 28),
+                  padding: const EdgeInsets.only(top: 28),
                   child: Icon(
                     Icons.contact_support_outlined,
                     size: 30,
@@ -51,9 +51,9 @@ class _MyApp2State extends State<MyApp2> {
                   ),
                 ),
                 label: '히스토리'),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Padding(
-                padding: EdgeInsets.only(top: 28),
+                padding: const EdgeInsets.only(top: 28),
                 child: Icon(
                   Icons.perm_media_outlined,
                   size: 30,
@@ -69,9 +69,9 @@ class _MyApp2State extends State<MyApp2> {
                         '/Users/parkjiwon/Desktop/soda/sodapj/assets/oo.png',
                         width: 28)),
                 label: '홈'),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
                 icon: Padding(
-                  padding: EdgeInsets.only(top: 28),
+                  padding: const EdgeInsets.only(top: 28),
                   child: Icon(
                     Icons.date_range_outlined,
                     size: 30,
@@ -79,9 +79,9 @@ class _MyApp2State extends State<MyApp2> {
                   ),
                 ),
                 label: '캘린더'),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
                 icon: Padding(
-                  padding: EdgeInsets.only(top: 28),
+                  padding: const EdgeInsets.only(top: 28),
                   child: Icon(
                     Icons.settings_outlined,
                     size: 30,
@@ -90,7 +90,7 @@ class _MyApp2State extends State<MyApp2> {
                 ),
                 label: '설정'),
           ],
-          selectedIconTheme: const IconThemeData(color: AppColor.text),
+          selectedIconTheme: IconThemeData(color: AppColor.text),
           selectedLabelStyle: b13,
           unselectedLabelStyle: b13.copyWith(color: AppColor.secondary),
           currentIndex: _selectedIndex,

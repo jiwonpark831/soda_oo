@@ -1,41 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../main2.dart';
 import '../theme/color.dart';
 import '../theme/text.dart';
 
-
-class RandomRoomScreen extends StatefulWidget {
+class RandomRoomScreen extends StatelessWidget {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _roomCodeController = TextEditingController();
   final String userEmail;
-
   static String roomCode = '';
   static String profilePicture = '';
   static String profileField = '';
-  
+
   RandomRoomScreen({required this.userEmail});
-
-  @override
-  State<RandomRoomScreen> createState() => _RandomRoomScreenState();
-}
-
-class _RandomRoomScreenState extends State<RandomRoomScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  final TextEditingController _roomCodeController = TextEditingController();
-
-  String _textFieldValue = '';
-  bool _isTextFieldEmpty = true;
-
-  void _updateTextFieldValue(String value) {
-    setState(() {
-      _textFieldValue = value;
-      _isTextFieldEmpty = value.isEmpty;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +27,12 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '우리 가족 방 입장하기',
-                style: b20,
+              Padding(
+                padding: const EdgeInsets.only(top: 150),
+                child: Text(
+                  '우리 가족 방 입장하기',
+                  style: b20,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 26),
@@ -57,7 +40,7 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
                   width: 272,
                   height: 46,
                   child: TextField(
-                    onChanged: _updateTextFieldValue,
+                    //  onChanged: _updateTextFieldValue,
                     controller: _roomCodeController,
                     decoration: InputDecoration(
                       fillColor: AppColor.textbox,
@@ -91,6 +74,7 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
                     ),
                     onPressed: () {
                       String roomCode = _roomCodeController.text;
+                      print(roomCode);
                       if (roomCode.isNotEmpty) {
                         joinRoom(roomCode);
                         Navigator.push(context,
@@ -99,22 +83,19 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
                     },
                     child: Text(
                       '입장',
-                      style: l17.copyWith(
-                          color: _isTextFieldEmpty
-                              ? AppColor.texth
-                              : AppColor.text),
+                      style: b18.copyWith(color: Color(0xff424242)),
                     ),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 220),
+                padding: const EdgeInsets.only(top: 170),
                 child: TextButton(
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String roomCode = generateRandomCode();
+                        roomCode = generateRandomCode();
                         return AlertDialog(
                           backgroundColor: AppColor.textbox,
                           title: Text(
@@ -130,7 +111,7 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
                                   child: Container(
                                       height: 32,
                                       width: 224,
-                                      color: AppColor.textt,
+                                      color: Color(0xffD9D9D9),
                                       child: Center(
                                           child: Text(
                                         '가족코드: $roomCode',
@@ -147,7 +128,7 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
                           actions: <Widget>[
                             TextButton(
                               style: TextButton.styleFrom(
-                                  backgroundColor: AppColor.primary),
+                                  backgroundColor: Color(0xffF9E7C5)),
                               onPressed: () {
                                 Clipboard.setData(
                                     ClipboardData(text: roomCode)); //클립보드 복사
@@ -186,7 +167,8 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
 
   void createRoom(String roomCode) {
     _firestore.collection('rooms').doc(roomCode).set({
-      'createdAt': DateTime.now(),
+      'images': [],
+      'comments': [],
       'users': [],
     });
   }
@@ -199,8 +181,24 @@ class _RandomRoomScreenState extends State<RandomRoomScreen> {
       dynamic data = roomSnapshot.data();
       if (data != null && data.containsKey('users')) {
         List<dynamic> users = List.from(data['users']);
-        users.add(widget.userEmail); // 사용자 ID를 추가해야 합니다.
+        users.add(userEmail); // 사용자 ID를 추가해야 합니다.
         roomRef.update({'users': users});
+
+        DocumentReference userRef =
+            _firestore.collection('users').doc(userEmail);
+        DocumentSnapshot userSnapshot = await userRef.get();
+        if (userSnapshot.exists) {
+          dynamic userData = userSnapshot.data();
+          if (userData != null) {
+            String nickname = userData['nickname'];
+            String profileImage = userData['profileImage'];
+
+            // rooms 컬렉션에 닉네임과 프로필 이미지 필드 추가
+            roomRef.update({
+              'nickname': nickname,
+            });
+          }
+        }
       }
     }
   }
